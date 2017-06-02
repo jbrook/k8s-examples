@@ -1,0 +1,40 @@
+apiVersion: extensions/v1beta1
+kind: Deployment 
+metadata:
+  name: echoheadersa-deployment
+spec:
+  replicas: 1 # We want 1 pod running the echoserver process
+  template:
+    metadata:
+      labels:
+        app: echoheadersa
+    spec:
+      containers:
+      - name: echoheadersa
+        image: gcr.io/google_containers/echoserver:1.4
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          periodSeconds: 1
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echoheadersa
+  labels:
+    app: echoheadersa
+spec:
+  type: NodePort
+  ports:
+  - port: 9000
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: echoheadersa

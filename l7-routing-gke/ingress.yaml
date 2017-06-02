@@ -1,0 +1,44 @@
+apiVersion: extensions/v1beta1
+# Ingress is actually an abastraction over services.
+# It's a layer 7 construct (Service is Layer 4).
+# An Ingress is a collection of rules that allow 
+# inbound connections to reach our services (listening
+# on NodePorts). In the case of GKE various resources
+# are created, some of them outside the cluster.
+#
+# To test this you can modify your /etc/hosts file
+#     <ingress IP> foo.bar.com bar.baz.com
+# You can get the IP of the ingress with:
+#     kubectl get ingresses
+# Then try hitting:
+#  * http://<ingress ip>/
+#  * http://<ingress ip>/foo
+#  * http://foo.bar.com/
+#  * http://foo.bar.com/foo
+#  * http://foo.bar.com/bar
+#  * http://bar.baz.com/
+#  * http://bar.baz.com/foo
+#  * http://bar.baz.com/bar
+kind: Ingress
+metadata:
+  name: echomap
+spec:
+  rules:
+  - host: foo.bar.com
+    http:
+      paths:
+      - path: /foo
+        backend:
+          serviceName: echoheadersa
+          servicePort: 9000
+  - host: bar.baz.com
+    http:
+      paths:
+      - path: /bar
+        backend:
+          serviceName: echoheadersb
+          servicePort: 9001
+      - path: /foo
+        backend:
+          serviceName: echoheadersa
+          servicePort: 9000
